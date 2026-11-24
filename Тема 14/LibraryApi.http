@@ -1,0 +1,25 @@
+@LibraryApi_HostAddress = http://localhost:5205
+
+GET {{LibraryApi_HostAddress}}/api/books
+Accept: application/json
+
+###
+
+POST {{LibraryApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Война и мир",
+  "author": "Лев Толстой",
+  "isAvailable": true
+}
+
+###
+
+POST {{LibraryApi_HostAddress}}/api/loans
+Content-Type: application/json
+
+{
+  "bookId": 1,
+  "borrowerName": "Иван Иванов"
+}

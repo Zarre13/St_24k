@@ -1,0 +1,24 @@
+@BooksApi_HostAddress = http://localhost:5001
+
+GET {{BooksApi_HostAddress}}/api/Books
+Accept: application/json
+
+###
+
+GET {{BooksApi_HostAddress}}/api/Books/1
+Accept: application/json
+
+###
+
+GET {{BooksApi_HostAddress}}/api/Books/search?title=война
+Accept: application/json
+
+###
+
+GET {{BooksApi_HostAddress}}/api/Books/by-title/Война%20и%20мир
+Accept: application/json
+
+###
+
+GET {{BooksApi_HostAddress}}/api/Books/not-a-number
+Accept: application/json

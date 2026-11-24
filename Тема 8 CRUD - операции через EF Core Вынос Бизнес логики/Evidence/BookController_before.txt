@@ -1,0 +1,116 @@
+using Library.Data;
+using Library.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace Library.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class BookController : ControllerBase
+{
+    private readonly AppDbContext _context;
+
+    public BookController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    // GET: api/book
+    [HttpGet]
+    public ActionResult<IEnumerable<Book>> GetAll()
+    {
+        return Ok(_context.Books.ToList());
+    }
+
+    // GET: api/book/{id}
+    [HttpGet("{id:int}")]
+    public ActionResult<Book> GetById(int id)
+    {
+        var book = _context.Books.FirstOrDefault(b => b.Id == id);
+        if (book == null) return NotFound();
+        return book;
+    }
+
+    // GET: api/book/search?author=...&minPrice=...
+    [HttpGet("search")]
+    public ActionResult<IEnumerable<Book>> Search(
+        [FromQuery] string? author,
+        [FromQuery] decimal? minPrice)
+    {
+        var query = _context.Books.AsQueryable();
+
+        if (author != null)
+            query = query.Where(b => b.Author == author);
+
+        if (minPrice != null)
+            query = query.Where(b => b.Price >= minPrice);
+
+        return Ok(query.ToList());
+    }
+
+    // GET: api/book/filter
+    [HttpGet("filter")]
+    public ActionResult<IEnumerable<Book>> Filter([FromQuery] BookFilter filter)
+    {
+        var query = _context.Books.AsQueryable();
+
+        if (filter.Author != null)
+            query = query.Where(b => b.Author == filter.Author);
+
+        if (filter.MinPrice != null)
+            query = query.Where(b => b.Price >= filter.MinPrice);
+
+        if (filter.MaxPrice != null)
+            query = query.Where(b => b.Price <= filter.MaxPrice);
+
+        return Ok(query.ToList());
+    }
+
+    // POST: api/book
+    [HttpPost]
+    public ActionResult<Book> Create([FromBody] Book book)
+    {
+        if (_context.Books.Any(b => b.Title == book.Title))
+        {
+            ModelState.AddModelError(
+                nameof(book.Title),
+                "Книга с таким названием уже существует.");
+            return ValidationProblem(ModelState);
+        }
+
+        // Id НЕ назначаем вручную — БД сгенерирует сам.
+        _context.Books.Add(book);
+        _context.SaveChanges();
+
+        return CreatedAtAction(nameof(GetById),
+            new { id = book.Id }, book);
+    }
+
+    // PUT: api/book/{id}
+    [HttpPut("{id:int}")]
+    public IActionResult Update(int id, Book updated)
+    {
+        var book = _context.Books.FirstOrDefault(b => b.Id == id);
+        if (book == null) return NotFound();
+
+        book.Title = updated.Title;
+        book.Author = updated.Author;
+        book.Price = updated.Price;
+
+        _context.SaveChanges();
+        return NoContent();
+    }
+
+    // DELETE: api/book/{id}
+    [HttpDelete("{id:int}")]
+    public IActionResult Delete(int id)
+    {
+        var book = _context.Books.FirstOrDefault(b => b.Id == id);
+        if (book == null) return NotFound();
+
+        _context.Books.Remove(book);
+        _context.SaveChanges();
+        return NoContent();
+    }
+}

@@ -1,0 +1,6 @@
+@CatalogApiG_HostAddress = http://localhost:5193
+
+GET {{CatalogApiG_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
